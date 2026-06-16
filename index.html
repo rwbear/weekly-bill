@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Квитанция</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #ffffff; --surface: #f7f7f7; --border: #e0e0e0; --border-dark: #222;
+    --text: #111111; --text-muted: #888888; --accent: #111111;
+    --danger: #cc0000; --radius: 2px; --font: "Inter", system-ui, sans-serif;
+  }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; padding: 0 0 80px 0; -webkit-font-smoothing: antialiased; }
+  header { padding: 28px 20px 20px; border-bottom: 2px solid var(--border-dark); margin-bottom: 28px; }
+  header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  header p { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  .container { padding: 0 20px; }
+  .section { margin-bottom: 32px; }
+  .section-label { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 8px; }
+  .period-row { display: flex; align-items: center; gap: 8px; }
+  .period-row input[type="date"] { flex: 1; font-family: var(--font); font-size: 15px; font-weight: 500; border: none; background: transparent; color: var(--text); padding: 4px 0; outline: none; -webkit-appearance: none; appearance: none; min-width: 0; }
+  .period-sep { font-size: 13px; color: var(--text-muted); flex-shrink: 0; }
+  .row-label { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
+  .row-label + .row-label { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .row-text { font-size: 14px; font-weight: 500; }
+  .row-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .stepper { display: flex; align-items: center; border: 1px solid var(--border-dark); border-radius: var(--radius); overflow: hidden; flex-shrink: 0; }
+  .stepper button { width: 36px; height: 36px; background: var(--bg); border: none; font-size: 18px; font-weight: 300; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; transition: background 0.1s; }
+  .stepper button:active { background: var(--border); }
+  .stepper-val { min-width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600; border-left: 1px solid var(--border-dark); border-right: 1px solid var(--border-dark); user-select: none; }
+  .expense-row { display: flex; align-items: center; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .expense-row:first-child { padding-top: 0; }
+  .expense-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .expense-amount { width: 80px; flex-shrink: 0; font-family: var(--font); font-size: 14px; font-weight: 500; border: 1px solid var(--border); border-radius: var(--radius); padding: 8px; background: var(--bg); color: var(--text); outline: none; -webkit-appearance: none; }
+  .expense-amount:focus { border-color: var(--border-dark); }
+  .currency-sel { width: 64px; flex-shrink: 0; font-family: var(--font); font-size: 13px; font-weight: 500; border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 4px; background: var(--bg); color: var(--text); outline: none; -webkit-appearance: none; appearance: none; text-align: center; }
+  .currency-sel:focus { border-color: var(--border-dark); }
+  .expense-desc { flex: 1; font-family: var(--font); font-size: 14px; border: 1px solid var(--border); border-radius: var(--radius); padding: 8px; background: var(--bg); color: var(--text); outline: none; min-width: 0; }
+  .expense-desc:focus { border-color: var(--border-dark); }
+  .btn-delete { width: 30px; height: 30px; flex-shrink: 0; background: none; border: none; color: var(--danger); font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; -webkit-tap-highlight-color: transparent; }
+  .btn-add { display: flex; align-items: center; gap: 6px; background: none; border: 1px dashed var(--border-dark); border-radius: var(--radius); padding: 11px 14px; font-family: var(--font); font-size: 13px; font-weight: 500; color: var(--text); cursor: pointer; width: 100%; margin-top: 10px; -webkit-tap-highlight-color: transparent; transition: background 0.1s; }
+  .btn-add:active { background: var(--surface); }
+  .btn-add-icon { font-size: 18px; line-height: 1; }
+  .sub-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 8px; }
+  .sub-card-top { display: flex; align-items: flex-start; gap: 8px; }
+  .sub-name { font-size: 14px; font-weight: 600; flex: 1; font-family: var(--font); border: none; background: transparent; color: var(--text); outline: none; padding: 0; }
+  .sub-name::placeholder { color: var(--text-muted); font-weight: 400; }
+  .sub-card-bottom { display: flex; gap: 8px; margin-top: 10px; align-items: center; flex-wrap: wrap; }
+  .sub-amount { width: 80px; flex-shrink: 0; font-family: var(--font); font-size: 14px; border: 1px solid var(--border); border-radius: var(--radius); padding: 7px 8px; background: var(--bg); color: var(--text); outline: none; -webkit-appearance: none; }
+  .sub-amount:focus { border-color: var(--border-dark); }
+  .sub-day-label { font-size: 12px; color: var(--text-muted); flex-shrink: 0; }
+  .sub-day { width: 52px; flex-shrink: 0; font-family: var(--font); font-size: 14px; border: 1px solid var(--border); border-radius: var(--radius); padding: 7px 8px; background: var(--bg); color: var(--text); outline: none; -webkit-appearance: none; text-align: center; }
+  .sub-day:focus { border-color: var(--border-dark); }
+  .sub-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.5px; padding: 3px 7px; border-radius: 10px; flex-shrink: 0; }
+  .sub-badge.due { background: #111; color: #fff; }
+  .sub-badge.not-due { background: var(--border); color: var(--text-muted); }
+  .preview-block { background: #f0f0f0; border: 1px solid var(--border-dark); border-radius: var(--radius); padding: 18px 16px; font-family: "Courier New", monospace; font-size: 13px; line-height: 1.7; white-space: pre-wrap; word-break: break-word; color: var(--text); min-height: 60px; }
+  .btn-copy { display: block; width: 100%; padding: 16px; background: var(--accent); color: #fff; border: none; border-radius: var(--radius); font-family: var(--font); font-size: 15px; font-weight: 700; letter-spacing: 0.2px; cursor: pointer; margin-top: 12px; -webkit-tap-highlight-color: transparent; transition: opacity 0.15s; }
+  .btn-copy:active { opacity: 0.7; }
+  .btn-copy.copied { background: #1a7a1a; }
+  .rates-info { font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 8px; }
+  input[type="number"] { -moz-appearance: textfield; }
+  input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .empty-hint { font-size: 13px; color: #888; padding: 4px 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Квитанция</h1>
+  <p>Генератор еженедельного отчёта</p>
+</header>
+<div class="container">
+  <div class="section">
+    <div class="section-label">Период</div>
+    <div class="card">
+      <div class="period-row">
+        <input type="date" id="dateFrom">
+        <span class="period-sep">—</span>
+        <input type="date" id="dateTo">
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-label">Стандартные расходы</div>
+    <div class="card">
+      <div class="row-label">
+        <div>
+          <div class="row-text">Прожиточный минимум</div>
+          <div class="row-sub">25 BYN × <span id="daysDisplay">0</span> дн.</div>
+        </div>
+        <div class="stepper">
+          <button onclick="changeDays(-1)">−</button>
+          <div class="stepper-val" id="daysVal">0</div>
+          <button onclick="changeDays(+1)">+</button>
+        </div>
+      </div>
+      <div class="row-label">
+        <div>
+          <div class="row-text">Тренировки</div>
+          <div class="row-sub">30 BYN × количество</div>
+        </div>
+        <div class="stepper">
+          <button onclick="changeTrainings(-1)">−</button>
+          <div class="stepper-val" id="trainingsVal">0</div>
+          <button onclick="changeTrainings(+1)">+</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-label">Дополнительные расходы</div>
+    <div class="card" id="extraList"><div class="empty-hint">Нет дополнительных расходов</div></div>
+    <button class="btn-add" onclick="addExtra()"><span class="btn-add-icon">+</span> Добавить расход</button>
+  </div>
+  <div class="section">
+    <div class="section-label">Подписки</div>
+    <div id="subList"></div>
+    <button class="btn-add" onclick="addSubscription()"><span class="btn-add-icon">+</span> Добавить подписку</button>
+  </div>
+  <div class="section">
+    <div class="section-label">Предпросмотр</div>
+    <div class="preview-block" id="preview">Заполните данные выше…</div>
+    <div class="rates-info" id="ratesInfo"></div>
+    <button class="btn-copy" id="copyBtn" onclick="copyBill()">Скопировать</button>
+  </div>
+</div>
+<script>
+var days=0,trainings=0,extras=[],subs=[],rates={},extraIdCounter=0,subIdCounter=0;
+var CURRENCIES=['BYN','USD','EUR','GBP','RUB'];
+var CUR_SYMBOLS={BYN:'BYN',USD:'$',EUR:'\u20ac',GBP:'\u00a3',RUB:'\u20bd'};
+
+document.addEventListener('DOMContentLoaded',function(){
+  loadStorage();
+  setDefaultDates();
+  fetchRates();
+  document.getElementById('dateFrom').addEventListener('change',onDateChange);
+  document.getElementById('dateTo').addEventListener('change',onDateChange);
+});
+
+function setDefaultDates(){
+  var today=new Date();
+  var dow=today.getDay();
+  var diff=(dow===0)?-6:1-dow;
+  var mon=new Date(today); mon.setDate(today.getDate()+diff);
+  var sun=new Date(mon); sun.setDate(mon.getDate()+6);
+  document.getElementById('dateFrom').value=fmtISO(mon);
+  document.getElementById('dateTo').value=fmtISO(sun);
+  recalcDays();
+}
+
+function onDateChange(){ recalcDays(); renderSubs(); updatePreview(); }
+
+function recalcDays(){
+  var f=document.getElementById('dateFrom').value;
+  var t=document.getElementById('dateTo').value;
+  if(!f||!t)return;
+  var ms=new Date(t)-new Date(f);
+  var d=Math.max(0,Math.round(ms/86400000)+1);
+  days=d;
+  document.getElementById('daysVal').textContent=days;
+  document.getElementById('daysDisplay').textContent=days;
+  updatePreview();
+}
+
+function changeDays(delta){days=Math.max(0,days+delta);document.getElementById('daysVal').textContent=days;document.getElementById('daysDisplay').textContent=days;updatePreview();}
+function changeTrainings(delta){trainings=Math.max(0,trainings+delta);document.getElementById('trainingsVal').textContent=trainings;updatePreview();}
+
+function addExtra(data){
+  var id=extraIdCounter++;
+  extras.push({id:id,amount:data?data.amount:'',currency:data?data.currency:'BYN',desc:data?data.desc:''});
+  renderExtras();updatePreview();
+}
+
+function removeExtra(id){extras=extras.filter(function(e){return e.id!==id;});renderExtras();updatePreview();}
+
+function renderExtras(){
+  var list=document.getElementById('extraList');
+  if(extras.length===0){list.innerHTML='<div class="empty-hint">\u041d\u0435\u0442 \u0434\u043e\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044c\u043d\u044b\u0445 \u0440\u0430\u0441\u0445\u043e\u0434\u043e\u0432</div>';return;}
+  list.innerHTML=extras.map(function(e){
+    return '<div class="expense-row">'+
+      '<input class="expense-amount" type="number" placeholder="0" value="'+escHtml(e.amount)+'" oninput="updateExtra('+e.id+',\'amount\',this.value)">'+
+      '<select class="currency-sel" onchange="updateExtra('+e.id+',\'currency\',this.value)">'+
+        CURRENCIES.map(function(c){return '<option value="'+c+'"'+(c===e.currency?' selected':'')+'>'+c+'</option>';}).join('')+
+      '</select>'+
+      '<input class="expense-desc" type="text" placeholder="\u041e\u043f\u0438\u0441\u0430\u043d\u0438\u0435" value="'+escHtml(e.desc)+'" oninput="updateExtra('+e.id+',\'desc\',this.value)">'+
+      '<button class="btn-delete" onclick="removeExtra('+e.id+')">&times;</button>'+
+    '</div>';
+  }).join('');
+}
+
+function updateExtra(id,field,val){var e=extras.find(function(x){return x.id===id;});if(e){e[field]=val;saveStorage();updatePreview();}}
+
+function addSubscription(data){
+  var id=subIdCounter++;
+  subs.push({id:id,name:data?data.name:'',amount:data?data.amount:'',currency:data?data.currency:'BYN',day:data?data.day:1});
+  renderSubs();updatePreview();
+}
+
+function removeSubscription(id){subs=subs.filter(function(s){return s.id!==id;});renderSubs();updatePreview();}
+
+function renderSubs(){
+  var list=document.getElementById('subList');
+  if(subs.length===0){list.innerHTML='';return;}
+  list.innerHTML=subs.map(function(s){
+    var due=isSubDue(s);
+    return '<div class="sub-card">'+
+      '<div class="sub-card-top">'+
+        '<input class="sub-name" type="text" placeholder="\u041d\u0430\u0437\u0432\u0430\u043d\u0438\u0435 \u043f\u043e\u0434\u043f\u0438\u0441\u043a\u0438" value="'+escHtml(s.name)+'" oninput="updateSub('+s.id+',\'name\',this.value)">'+
+        '<span class="sub-badge '+(due?'due':'not-due')+'">'+(due?'\u0412 \u0441\u0447\u0451\u0442':'\u041d\u0435 \u0432 \u0441\u0447\u0451\u0442')+'</span>'+
+        '<button class="btn-delete" onclick="removeSubscription('+s.id+')">&times;</button>'+
+      '</div>'+
+      '<div class="sub-card-bottom">'+
+        '<input class="sub-amount" type="number" placeholder="\u0421\u0443\u043c\u043c\u0430" value="'+escHtml(s.amount)+'" oninput="updateSub('+s.id+',\'amount\',this.value)">'+
+        '<select class="currency-sel" onchange="updateSub('+s.id+',\'currency\',this.value)">'+
+          CURRENCIES.map(function(c){return '<option value="'+c+'"'+(c===s.currency?' selected':'')+'>'+c+'</option>';}).join('')+
+        '</select>'+
+        '<span class="sub-day-label">\u0434\u0435\u043d\u044c \u043c\u0435\u0441.:</span>'+
+        '<input class="sub-day" type="number" min="1" max="31" value="'+s.day+'" oninput="updateSub('+s.id+',\'day\',parseInt(this.value)||1)">'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function updateSub(id,field,val){var s=subs.find(function(x){return x.id===id;});if(s){s[field]=val;saveStorage();renderSubs();updatePreview();}}
+
+function isSubDue(s){
+  var f=document.getElementById('dateFrom').value;
+  var t=document.getElementById('dateTo').value;
+  if(!f||!t)return false;
+  var from=new Date(f);var to=new Date(t);
+  var day=parseInt(s.day);if(!day||isNaN(day))return false;
+  var d=new Date(from.getFullYear(),from.getMonth(),day);
+  if(d<from)d=new Date(from.getFullYear(),from.getMonth()+1,day);
+  return d>=from&&d<=to;
+}
+
+async function fetchRates(){
+  try{
+    var res=await fetch('https://open.er-api.com/v6/latest/BYN');
+    var data=await res.json();
+    if(data.result==='success'){
+      var r=data.rates;
+      rates.USD=r.USD?1/r.USD:null;
+      rates.EUR=r.EUR?1/r.EUR:null;
+      rates.GBP=r.GBP?1/r.GBP:null;
+      rates.RUB=r.RUB?1/r.RUB:null;
+      var parts=[];
+      if(rates.USD)parts.push('1 USD \u2248 '+rates.USD.toFixed(2)+' BYN');
+      if(rates.EUR)parts.push('1 EUR \u2248 '+rates.EUR.toFixed(2)+' BYN');
+      document.getElementById('ratesInfo').textContent=parts.join(' | ');
+    }
+  }catch(e){document.getElementById('ratesInfo').textContent='\u041a\u0443\u0440\u0441\u044b \u0432\u0430\u043b\u044e\u0442 \u043d\u0435\u0434\u043e\u0441\u0442\u0443\u043f\u043d\u044b';}
+  updatePreview();
+}
+
+function convertToBYN(amount,currency){
+  if(currency==='BYN')return parseFloat(amount);
+  if(!rates[currency])return null;
+  return parseFloat(amount)*rates[currency];
+}
+
+function formatOriginal(amount,currency){
+  var sym=CUR_SYMBOLS[currency];
+  if(currency==='USD'||currency==='EUR'||currency==='GBP')return sym+amount;
+  return amount+sym;
+}
+
+function generateBill(){
+  var f=document.getElementById('dateFrom').value;
+  var t=document.getElementById('dateTo').value;
+  if(!f||!t)return '';
+  var dateFrom=fmtRU(f);var dateTo=fmtRU(t);
+  var total=0;var formulaParts=[];var bullets=[];
+  if(days>0){
+    total+=25*days;
+    formulaParts.push(days===1?'25':'25*'+days);
+    bullets.push('\u2022 \u043f\u0440\u043e\u0436\u0438\u0442\u043e\u0447\u043d\u044b\u0439 \u043c\u0438\u043d\u0438\u043c\u0443\u043c \u043d\u0430 \u043d\u0435\u0434\u0435\u043b\u044e \u2014 '+(days===1?'25':'25*'+days));
+  }
+  if(trainings>0){
+    total+=30*trainings;
+    formulaParts.push(trainings===1?'30':'30*'+trainings);
+    bullets.push('\u2022 \u0442\u0440\u0435\u043d\u0438\u0440\u043e\u0432\u043a\u0438 \u2014 '+(trainings===1?'30':'30*'+trainings));
+  }
+  extras.forEach(function(e){
+    var amt=parseFloat(e.amount);
+    if(!amt||!e.desc.trim())return;
+    if(e.currency==='BYN'){
+      total+=amt;formulaParts.push(String(amt));
+      bullets.push('\u2022 '+amt+' \u2014 '+e.desc);
+    }else{
+      var byn=convertToBYN(amt,e.currency);
+      if(byn===null)return;
+      var bynR=Math.round(byn*10)/10;
+      total+=bynR;
+      var orig=formatOriginal(amt,e.currency);
+      formulaParts.push(String(bynR));
+      bullets.push('\u2022 '+bynR+' ('+orig+') \u2014 '+e.desc);
+    }
+  });
+  subs.forEach(function(s){
+    if(!isSubDue(s))return;
+    var amt=parseFloat(s.amount);
+    if(!amt||!s.name.trim())return;
+    if(s.currency==='BYN'){
+      total+=amt;formulaParts.push(String(amt));
+      bullets.push('\u2022 '+amt+' \u2014 '+s.name);
+    }else{
+      var byn=convertToBYN(amt,s.currency);
+      if(byn===null)return;
+      var bynR=Math.round(byn*10)/10;
+      total+=bynR;
+      var orig=formatOriginal(amt,s.currency);
+      formulaParts.push(String(bynR));
+      bullets.push('\u2022 '+bynR+' ('+orig+') \u2014 '+s.name);
+    }
+  });
+  var totalInt=Math.floor(total);
+  var totalFmt=Number.isInteger(total)?total:Math.round(total*10)/10;
+  var formula=formulaParts.join('+')+' = '+totalFmt;
+  var sep='\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014';
+  var lines=[];
+  lines.push('\u041a\u0432\u0438\u0442\u0430\u043d\u0446\u0438\u044f \u043f\u043e \u043e\u043f\u043b\u0430\u0442\u0435 ('+dateFrom+'\u2013'+dateTo+')');
+  lines.push('');
+  lines.push('\u0421\u0443\u043c\u043c\u0430: | '+totalInt+' |');
+  lines.push('');
+  lines.push(sep);
+  lines.push(formula);
+  lines.push(sep);
+  lines.push('');
+  lines.push.apply(lines,bullets);
+  return lines.join('\n');
+}
+
+function updatePreview(){
+  var bill=generateBill();
+  if(!bill){document.getElementById('preview').innerHTML='\u0417\u0430\u043f\u043e\u043b\u043d\u0438\u0442\u0435 \u0434\u0430\u043d\u043d\u044b\u0435 \u0432\u044b\u0448\u0435\u2026';return;}
+  var esc=bill.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  var rendered=esc.replace(/(\u0421\u0443\u043c\u043c\u0430: \| )(\d+)( \|)/,'$1<strong><u>$2</u></strong>$3');
+  document.getElementById('preview').innerHTML=rendered;
+  saveStorage();
+}
+
+function copyBill(){
+  var bill=generateBill();if(!bill)return;
+  var btn=document.getElementById('copyBtn');
+  navigator.clipboard.writeText(bill).then(function(){
+    btn.textContent='\u2713 \u0421\u043a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u043d\u043e';btn.classList.add('copied');
+    setTimeout(function(){btn.textContent='\u0421\u043a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c';btn.classList.remove('copied');},2000);
+  }).catch(function(){
+    var ta=document.createElement('textarea');ta.value=bill;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+    btn.textContent='\u2713 \u0421\u043a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u043d\u043e';btn.classList.add('copied');
+    setTimeout(function(){btn.textContent='\u0421\u043a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c';btn.classList.remove('copied');},2000);
+  });
+}
+
+function saveStorage(){
+  try{localStorage.setItem('bill_extras',JSON.stringify(extras));localStorage.setItem('bill_subs',JSON.stringify(subs));}catch(e){}
+}
+
+function loadStorage(){
+  try{
+    var ex=localStorage.getItem('bill_extras');
+    var sb=localStorage.getItem('bill_subs');
+    if(ex){extras=JSON.parse(ex);extraIdCounter=extras.reduce(function(m,e){return Math.max(m,e.id+1);},0);renderExtras();}
+    if(sb){subs=JSON.parse(sb);subIdCounter=subs.reduce(function(m,s){return Math.max(m,s.id+1);},0);renderSubs();}
+  }catch(e){}
+}
+
+function fmtISO(d){var y=d.getFullYear();var m=String(d.getMonth()+1).padStart(2,'0');var dd=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+dd;}
+function fmtRU(iso){var p=iso.split('-');return p[2]+'.'+p[1]+'.'+p[0];}
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+</script>
+</body>
+</html>
