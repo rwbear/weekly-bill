@@ -235,9 +235,9 @@ function generateBill(){
     else{var b=Math.round(toBYN(a,s.currency)*10)/10;if(!b)return;total+=b;parts.push(String(b));bullets.push('• **'+b+' ('+origStr(a,s.currency)+')** - '+s.name+' '+dayLabel);}
   });
   var tI=Math.floor(total),tF=Number.isInteger(total)?total:Math.round(total*10)/10;
-  var sep='——————————————';
+  var sep='────────────────';
   return[
-    '_Квитанция по оплате ('+dF+'–'+dT+')_',
+    'Квитанция по оплате ('+dF+'–'+dT+')',
     '',
     'Сумма: | **'+tI+'** |',
     sep,
