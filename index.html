@@ -21,7 +21,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .total-block{padding:14px 0 4px;}
 .total-line{display:flex;align-items:baseline;gap:6px;}
 .total-prefix{font-size:15px;font-weight:500;}
-.total-num{font-size:36px;font-weight:700;letter-spacing:-1px;line-height:1;text-decoration:underline;}
+.total-num{font-size:36px;font-weight:700;letter-spacing:-1px;line-height:1;}
 .total-suffix{font-size:15px;font-weight:500;color:var(--muted);}
 .formula-hint{font-size:12px;color:var(--muted);margin-top:4px;min-height:16px;}
 .divider{height:1px;background:var(--border);margin:0 24px;}
@@ -239,7 +239,7 @@ function generateBill(){
   return[
     'Квитанция по оплате ('+dF+'–'+dT+')',
     '',
-    'Сумма: | __'+tI+'__ |',
+    'Сумма: | **'+tI+'** |',
     sep,
     parts.join('+')+' = '+tF,
     sep,
