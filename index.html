@@ -16,30 +16,30 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .bill-header{padding:28px 24px 0;}
 .bill-label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
 .bill-dates{display:flex;align-items:center;gap:6px;margin-bottom:2px;}
-.bill-dates input[type=date]{font-family:var(--font);font-size:15px;font-weight:600;font-style:italic;color:var(--text);border:none;border-bottom:1.5px solid var(--text);background:transparent;outline:none;padding:2px 0 3px;-webkit-appearance:none;appearance:none;width:116px;}
-.bill-dates .sep{font-size:14px;color:var(--muted);font-style:italic;}
+.bill-dates input[type=date]{font-family:var(--font);font-size:15px;font-weight:600;color:var(--text);border:none;border-bottom:1.5px solid var(--text);background:transparent;outline:none;padding:2px 0 3px;-webkit-appearance:none;appearance:none;width:116px;}
+.bill-dates .sep{font-size:14px;color:var(--muted);}
 .total-block{padding:14px 0 4px;}
 .total-line{display:flex;align-items:baseline;gap:6px;}
 .total-prefix{font-size:15px;font-weight:500;}
-.total-pipe{font-size:15px;font-weight:500;color:var(--muted);}
 .total-num{font-size:36px;font-weight:700;letter-spacing:-1px;line-height:1;text-decoration:underline;}
 .total-suffix{font-size:15px;font-weight:500;color:var(--muted);}
-.formula-hint{font-size:12px;color:var(--muted);margin-top:4px;font-style:italic;letter-spacing:0.1px;min-height:16px;}
+.formula-hint{font-size:12px;color:var(--muted);margin-top:4px;min-height:16px;}
 .divider{height:1px;background:var(--border);margin:0 24px;}
 .divider-bold{height:2px;background:var(--text);margin:0 24px;}
 .lines{padding:0 24px;}
 .bill-line{display:flex;align-items:center;min-height:48px;border-bottom:1px solid var(--border);gap:8px;}
 .bill-line:last-child{border-bottom:none;}
 .line-bullet{font-size:15px;flex-shrink:0;color:var(--muted);width:12px;}
+.line-amt-static{font-size:15px;font-weight:700;flex-shrink:0;min-width:48px;}
 .line-amount{font-size:15px;font-weight:700;width:66px;border:none;border-bottom:1.5px solid transparent;background:transparent;color:var(--text);outline:none;padding:2px 0;text-align:left;flex-shrink:0;}
 .line-amount:focus{border-bottom-color:var(--text);}
 .line-cur-sel{font-size:12px;color:var(--muted);border:none;background:transparent;outline:none;-webkit-appearance:none;appearance:none;padding:0;cursor:pointer;width:34px;flex-shrink:0;}
 .line-dash{font-size:13px;color:var(--muted);flex-shrink:0;padding:0 2px;}
-.line-desc{flex:1;font-size:14px;font-style:italic;border:none;border-bottom:1.5px solid transparent;background:transparent;color:var(--text);outline:none;padding:2px 0;min-width:0;}
+.line-desc{flex:1;font-size:14px;border:none;border-bottom:1.5px solid transparent;background:transparent;color:var(--text);outline:none;padding:2px 0;min-width:0;}
 .line-desc:focus{border-bottom-color:var(--text);}
-.line-desc::placeholder{color:#ccc;font-style:normal;}
+.line-desc::placeholder{color:#ccc;}
 .line-amount::placeholder{color:#ccc;}
-.line-label{font-size:14px;font-style:italic;flex:1;}
+.line-label{font-size:14px;flex:1;}
 .line-stepper{display:flex;align-items:center;flex-shrink:0;margin-left:4px;}
 .step-btn{width:28px;height:28px;border:1px solid #ddd;background:var(--bg);font-size:17px;font-weight:300;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:50%;}
 .step-btn:active{background:#f0f0f0;}
@@ -58,7 +58,6 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .copy-btn{display:block;width:100%;max-width:480px;margin:0 auto;padding:15px;background:#111;color:#fff;border:none;font-family:var(--font);font-size:15px;font-weight:700;letter-spacing:0.3px;cursor:pointer;border-radius:4px;transition:opacity .15s;}
 .copy-btn:active{opacity:.7;}
 .copy-btn.ok{background:var(--green);}
-.line-amt-static{font-size:15px;font-weight:700;flex-shrink:0;min-width:52px;}
 </style>
 </head>
 <body>
@@ -221,13 +220,31 @@ function generateBill(){
   var f=document.getElementById('dateFrom').value,t=document.getElementById('dateTo').value;
   if(!f||!t)return'';
   var dF=ruDate(f),dT=ruDate(t),total=0,parts=[],bullets=[];
-  if(days>0){total+=25*days;parts.push('25*'+days);bullets.push('• **25*'+days+'** - _прожиточный минимум на неделю_');}
-  if(trainings>0){total+=30*trainings;parts.push('30*'+trainings);bullets.push('• **30*'+trainings+'** - _тренировки_');}
-  extras.forEach(function(e){var a=parseFloat(e.amount);if(!a||!e.desc.trim())return;if(e.currency==='BYN'){total+=a;parts.push(String(a));bullets.push('• **'+a+'** - _'+e.desc+'_');}else{var b=Math.round(toBYN(a,e.currency)*10)/10;if(!b)return;total+=b;parts.push(String(b));bullets.push('• **'+b+'** _('+origStr(a,e.currency)+')_ - _'+e.desc+'_');}});
-  subs.forEach(function(s){if(!isSubDue(s))return;var a=parseFloat(s.amount);if(!a||!s.name.trim())return;if(s.currency==='BYN'){total+=a;parts.push(String(a));bullets.push('• **'+a+'** - _'+s.name+'_');}else{var b=Math.round(toBYN(a,s.currency)*10)/10;if(!b)return;total+=b;parts.push(String(b));bullets.push('• **'+b+'** _('+origStr(a,s.currency)+')_ - _'+s.name+'_');}});
+  if(days>0){total+=25*days;parts.push('25*'+days);bullets.push('• **25*'+days+'** - прожиточный минимум на неделю');}
+  if(trainings>0){total+=30*trainings;parts.push('30*'+trainings);bullets.push('• **30*'+trainings+'** - тренировки');}
+  extras.forEach(function(e){
+    var a=parseFloat(e.amount);if(!a||!e.desc.trim())return;
+    if(e.currency==='BYN'){total+=a;parts.push(String(a));bullets.push('• **'+a+'** - '+e.desc);}
+    else{var b=Math.round(toBYN(a,e.currency)*10)/10;if(!b)return;total+=b;parts.push(String(b));bullets.push('• **'+b+' ('+origStr(a,e.currency)+')** - '+e.desc);}
+  });
+  subs.forEach(function(s){
+    if(!isSubDue(s))return;
+    var a=parseFloat(s.amount);if(!a||!s.name.trim())return;
+    var dayLabel='('+ordinalRu(parseInt(s.day)||1)+' числа месяца)';
+    if(s.currency==='BYN'){total+=a;parts.push(String(a));bullets.push('• **'+a+'** - '+s.name+' '+dayLabel);}
+    else{var b=Math.round(toBYN(a,s.currency)*10)/10;if(!b)return;total+=b;parts.push(String(b));bullets.push('• **'+b+' ('+origStr(a,s.currency)+')** - '+s.name+' '+dayLabel);}
+  });
   var tI=Math.floor(total),tF=Number.isInteger(total)?total:Math.round(total*10)/10;
   var sep='——————————————';
-  return['_Квитанция по оплате ('+dF+'–'+dT+')_','','Сумма: | **__'+tI+'__** |',sep,parts.join('+')+' = '+tF,sep,''].concat(bullets).join('\n');
+  return[
+    '_Квитанция по оплате ('+dF+'–'+dT+')_',
+    '',
+    'Сумма: | **'+tI+'** |',
+    sep,
+    parts.join('+')+' = '+tF,
+    sep,
+    ''
+  ].concat(bullets).join('\n');
 }
 function copyBill(){var txt=generateBill();if(!txt)return;var btn=document.getElementById('copyBtn');function ok(){btn.textContent='✓ Скопировано';btn.classList.add('ok');setTimeout(function(){btn.textContent='Скопировать квитанцию';btn.classList.remove('ok');},2200);}if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(ok).catch(function(){fallbackCopy(txt);ok();});}else{fallbackCopy(txt);ok();}}
 function fallbackCopy(t){var x=document.createElement('textarea');x.value=t;x.style.cssText='position:fixed;opacity:0;top:0;left:0';document.body.appendChild(x);x.focus();x.select();document.execCommand('copy');document.body.removeChild(x);}
@@ -237,6 +254,7 @@ function isoDate(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.get
 function pad(n){return String(n).padStart(2,'0');}
 function ruDate(iso){var p=iso.split('-');return p[2]+'.'+p[1]+'.'+p[0];}
 function escA(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+function ordinalRu(n){return n+'-е';}
 </script>
 </body>
 </html>
