@@ -225,21 +225,21 @@ function generateBill(){
   extras.forEach(function(e){
     var a=parseFloat(e.amount);if(!a||!e.desc.trim())return;
     if(e.currency==='BYN'){total+=a;parts.push(String(a));bullets.push('• **'+a+'** - '+e.desc);}
-    else{var b=Math.round(toBYN(a,e.currency)*10)/10;if(!b)return;total+=b;parts.push(String(b));bullets.push('• **'+b+' ('+origStr(a,e.currency)+')** - '+e.desc);}
+    else{var b=Math.round(toBYN(a,e.currency)*10)/10;if(!b)return;total+=b;parts.push(String(b));bullets.push('• **'+b+'** ('+origStr(a,e.currency)+') - '+e.desc);}
   });
   subs.forEach(function(s){
     if(!isSubDue(s))return;
     var a=parseFloat(s.amount);if(!a||!s.name.trim())return;
     var dayLabel='('+ordinalRu(parseInt(s.day)||1)+' числа месяца)';
     if(s.currency==='BYN'){total+=a;parts.push(String(a));bullets.push('• **'+a+'** - '+s.name+' '+dayLabel);}
-    else{var b=Math.round(toBYN(a,s.currency)*10)/10;if(!b)return;total+=b;parts.push(String(b));bullets.push('• **'+b+' ('+origStr(a,s.currency)+')** - '+s.name+' '+dayLabel);}
+    else{var b=Math.round(toBYN(a,s.currency)*10)/10;if(!b)return;total+=b;parts.push(String(b));bullets.push('• **'+b+'** ('+origStr(a,s.currency)+') - '+s.name+' '+dayLabel);}
   });
   var tI=Math.floor(total),tF=Number.isInteger(total)?total:Math.round(total*10)/10;
-  var sep='────────────────';
+  var sep='——————————————';
   return[
     'Квитанция по оплате ('+dF+'–'+dT+')',
     '',
-    'Сумма: | **'+tI+'** |',
+    'Сумма: | **__'+tI+'__** |',
     sep,
     parts.join('+')+' = '+tF,
     sep,
