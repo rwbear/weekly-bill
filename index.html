@@ -123,7 +123,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   </div>
 </div>
 <div class="copy-wrap">
-  <button class="copy-btn" id="copyBtn" onclick="copyBill()">Скопировать квитанцию</button>
+  <button class="copy-btn" id="copyBtn" onclick="copyBill()">Скопировать и отправить</button>
 </div>
 <script>
 var days=0,trainings=0,extras=[],subs=[],rates={},eid=0,sid=0;
@@ -246,7 +246,23 @@ function generateBill(){
     ''
   ].concat(bullets).join('\n');
 }
-function copyBill(){var txt=generateBill();if(!txt)return;var btn=document.getElementById('copyBtn');function ok(){btn.textContent='✓ Скопировано';btn.classList.add('ok');setTimeout(function(){btn.textContent='Скопировать квитанцию';btn.classList.remove('ok');},2200);}if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(ok).catch(function(){fallbackCopy(txt);ok();});}else{fallbackCopy(txt);ok();}}
+function openTelegram(txt){
+  var enc=encodeURIComponent(txt);
+  var isMobile=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if(isMobile){location.href='tg://msg?text='+enc;}
+  else{window.open('https://t.me/share/url?url='+enc,'_blank');}
+}
+function copyBill(){
+  var txt=generateBill();if(!txt)return;
+  var btn=document.getElementById('copyBtn');
+  function done(){
+    btn.textContent='✓ Отправляется...';btn.classList.add('ok');
+    openTelegram(txt);
+    setTimeout(function(){btn.textContent='Скопировать и отправить';btn.classList.remove('ok');},2500);
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done).catch(function(){fallbackCopy(txt);done();});}
+  else{fallbackCopy(txt);done();}
+}
 function fallbackCopy(t){var x=document.createElement('textarea');x.value=t;x.style.cssText='position:fixed;opacity:0;top:0;left:0';document.body.appendChild(x);x.focus();x.select();document.execCommand('copy');document.body.removeChild(x);}
 function saveStorage(){try{localStorage.setItem('b_ex',JSON.stringify(extras));localStorage.setItem('b_sb',JSON.stringify(subs));}catch(e){}}
 function loadStorage(){try{var ex=localStorage.getItem('b_ex');if(ex){extras=JSON.parse(ex);eid=extras.reduce(function(m,e){return Math.max(m,e.id+1);},0);}var sb=localStorage.getItem('b_sb');if(sb){subs=JSON.parse(sb);sid=subs.reduce(function(m,s){return Math.max(m,s.id+1);},0);}}catch(e){}}
