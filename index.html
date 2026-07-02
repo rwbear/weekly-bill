@@ -127,8 +127,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 </div>
 <script>
 var days=0,trainings=0,extras=[],subs=[],rates={},eid=0,sid=0;
-var CURR=['BYN','USD','EUR','GBP','RUB'];
-var SYM={BYN:'BYN',USD:'$',EUR:'€',GBP:'£',RUB:'₽'};
+var CURR=['BYN','USD','EUR','CNY','RUB'];
+var SYM={BYN:'BYN',USD:'$',EUR:'€',CNY:'¥',RUB:'₽'};
 document.addEventListener('DOMContentLoaded',function(){
   loadStorage();setWeek();fetchRates();
   document.getElementById('dateFrom').addEventListener('change',onDateChange);
@@ -199,19 +199,19 @@ function renderSubs(){
 async function fetchRates(){
   try{
     var r=await fetch('https://open.er-api.com/v6/latest/BYN'),d=await r.json();
-    if(d.result==='success'){var rs=d.rates;if(rs.USD)rates.USD=1/rs.USD;if(rs.EUR)rates.EUR=1/rs.EUR;if(rs.GBP)rates.GBP=1/rs.GBP;if(rs.RUB)rates.RUB=1/rs.RUB;}
+    if(d.result==='success'){var rs=d.rates;if(rs.USD)rates.USD=1/rs.USD;if(rs.EUR)rates.EUR=1/rs.EUR;if(rs.CNY)rates.CNY=1/rs.CNY;if(rs.RUB)rates.RUB=1/rs.RUB;}
   }catch(e){}
   recalc();
 }
 function toBYN(a,c){if(c==='BYN')return parseFloat(a)||0;return rates[c]?(parseFloat(a)||0)*rates[c]:0;}
-function origStr(a,c){var s=SYM[c];return(c==='USD'||c==='EUR'||c==='GBP')?s+a:a+s;}
+function origStr(a,c){var s=SYM[c];return(c==='USD'||c==='EUR'||c==='CNY')?s+a:a+s;}
 function recalc(){
   var total=0,parts=[];
   if(days>0){total+=25*days;parts.push('25*'+days);}
   if(trainings>0){total+=30*trainings;parts.push('30*'+trainings);}
   extras.forEach(function(e){var a=parseFloat(e.amount);if(!a||a<=0)return;var b=e.currency==='BYN'?a:Math.round(toBYN(a,e.currency)*10)/10;if(b>0){total+=b;parts.push(String(b));}});
   subs.forEach(function(s){if(!isSubDue(s))return;var a=parseFloat(s.amount);if(!a||a<=0)return;var b=s.currency==='BYN'?a:Math.round(toBYN(a,s.currency)*10)/10;if(b>0){total+=b;parts.push(String(b));}});
-  var tI=Math.floor(total);
+  var tI=Math.ceil(Math.round(total*10)/10);
   document.getElementById('totalDisplay').textContent=tI;
   document.getElementById('formulaHint').textContent=parts.length?parts.join('+')+' = '+tI:'';
   saveStorage();
@@ -234,7 +234,7 @@ function generateBill(){
     if(s.currency==='BYN'){total+=a;parts.push(String(a));bullets.push('• **'+a+'** - '+s.name+' '+dayLabel);}
     else{var b=Math.round(toBYN(a,s.currency)*10)/10;if(!b)return;total+=b;parts.push(String(b));bullets.push('• **'+b+'** ('+origStr(a,s.currency)+') - '+s.name+' '+dayLabel);}
   });
-  var tI=Math.floor(total),tF=Number.isInteger(total)?total:Math.round(total*10)/10;
+  var tI=Math.ceil(Math.round(total*10)/10),tF=Number.isInteger(total)?total:Math.round(total*10)/10;
   var sep='——————————————';
   return[
     'Квитанция по оплате ('+dF+'–'+dT+')',
@@ -263,8 +263,28 @@ function copyBill(){
   else{fallbackCopy(txt);done();}
 }
 function fallbackCopy(t){var x=document.createElement('textarea');x.value=t;x.style.cssText='position:fixed;opacity:0;top:0;left:0';document.body.appendChild(x);x.focus();x.select();document.execCommand('copy');document.body.removeChild(x);}
-function saveStorage(){try{localStorage.setItem('b_ex',JSON.stringify(extras));localStorage.setItem('b_sb',JSON.stringify(subs));}catch(e){}}
-function loadStorage(){try{var ex=localStorage.getItem('b_ex');if(ex){extras=JSON.parse(ex);eid=extras.reduce(function(m,e){return Math.max(m,e.id+1);},0);}var sb=localStorage.getItem('b_sb');if(sb){subs=JSON.parse(sb);sid=subs.reduce(function(m,s){return Math.max(m,s.id+1);},0);}}catch(e){}}
+function saveStorage(){
+  try{
+    var f=document.getElementById('dateFrom'),t=document.getElementById('dateTo');
+    if(f&&t&&f.value&&t.value)localStorage.setItem('b_period',f.value+'|'+t.value);
+    localStorage.setItem('b_ex',JSON.stringify(extras));
+    localStorage.setItem('b_sb',JSON.stringify(subs));
+  }catch(e){}
+}
+function loadStorage(){
+  try{
+    var now=new Date(),dow=now.getDay(),diff=dow===0?-6:1-dow;
+    var mon=new Date(now);mon.setDate(now.getDate()+diff);
+    var sun=new Date(mon);sun.setDate(mon.getDate()+6);
+    var curPeriod=isoDate(mon)+'|'+isoDate(sun);
+    var storedPeriod=localStorage.getItem('b_period')||'';
+    var ex=localStorage.getItem('b_ex');
+    if(ex&&storedPeriod===curPeriod){extras=JSON.parse(ex);eid=extras.reduce(function(m,e){return Math.max(m,e.id+1);},0);}
+    else if(storedPeriod&&storedPeriod!==curPeriod){localStorage.removeItem('b_ex');extras=[];eid=0;}
+    var sb=localStorage.getItem('b_sb');
+    if(sb){subs=JSON.parse(sb);sid=subs.reduce(function(m,s){return Math.max(m,s.id+1);},0);}
+  }catch(e){}
+}
 function isoDate(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
 function pad(n){return String(n).padStart(2,'0');}
 function ruDate(iso){var p=iso.split('-');return p[2]+'.'+p[1]+'.'+p[0];}
