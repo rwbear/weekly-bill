@@ -131,6 +131,8 @@ var CURR=['BYN','USD','EUR','CNY','RUB'];
 var SYM={BYN:'BYN',USD:'$',EUR:'€',CNY:'¥',RUB:'₽'};
 document.addEventListener('DOMContentLoaded',function(){
   loadStorage();setWeek();fetchRates();
+  document.getElementById('trainVal').textContent=trainings;
+  document.getElementById('trainAmt').textContent='30×'+trainings;
   document.getElementById('dateFrom').addEventListener('change',onDateChange);
   document.getElementById('dateTo').addEventListener('change',onDateChange);
   renderExtras();renderSubs();recalc();
@@ -268,6 +270,7 @@ function saveStorage(){
     var f=document.getElementById('dateFrom'),t=document.getElementById('dateTo');
     if(f&&t&&f.value&&t.value)localStorage.setItem('b_period',f.value+'|'+t.value);
     localStorage.setItem('b_ex',JSON.stringify(extras));
+    localStorage.setItem('b_tr',String(trainings));
     localStorage.setItem('b_sb',JSON.stringify(subs));
   }catch(e){}
 }
@@ -278,9 +281,12 @@ function loadStorage(){
     var sun=new Date(mon);sun.setDate(mon.getDate()+6);
     var curPeriod=isoDate(mon)+'|'+isoDate(sun);
     var storedPeriod=localStorage.getItem('b_period')||'';
+    var sameWeek=storedPeriod===curPeriod;
     var ex=localStorage.getItem('b_ex');
-    if(ex&&storedPeriod===curPeriod){extras=JSON.parse(ex);eid=extras.reduce(function(m,e){return Math.max(m,e.id+1);},0);}
-    else if(storedPeriod&&storedPeriod!==curPeriod){localStorage.removeItem('b_ex');extras=[];eid=0;}
+    if(ex&&sameWeek){extras=JSON.parse(ex);eid=extras.reduce(function(m,e){return Math.max(m,e.id+1);},0);}
+    else if(storedPeriod&&!sameWeek){localStorage.removeItem('b_ex');localStorage.removeItem('b_tr');extras=[];eid=0;trainings=0;}
+    var tr=localStorage.getItem('b_tr');
+    if(tr!==null&&sameWeek){trainings=parseInt(tr)||0;}
     var sb=localStorage.getItem('b_sb');
     if(sb){subs=JSON.parse(sb);sid=subs.reduce(function(m,s){return Math.max(m,s.id+1);},0);}
   }catch(e){}
